@@ -12,7 +12,20 @@
           "package_name": "com.ambtion.spendwise"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "72597800908-0srae20prpk431ieu52avo67cndkp0er.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ambtion.spendwise",
+            "certificate_hash": "a76c7495d9d4f6b057779ac995505e0017655e64"
+          }
+        },
+        {
+          "client_id": "72597800908-afs19sjmr9bkv1ngeid6d5aac3867ji2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCYQVfW80XcDk2QuUXWtYjm3nTCdmJFRBs"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72597800908-afs19sjmr9bkv1ngeid6d5aac3867ji2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
