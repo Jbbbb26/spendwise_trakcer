@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   cupertino_icons: ^1.0.8
   
   # Responsive UI tool
@@ -19,6 +20,7 @@ dependencies:
   # Firebase & Authentication
   firebase_core: ^3.15.2
   firebase_auth: ^5.4.0
+  cloud_firestore: ^5.6.0   # <--- ADD THIS LINE HERE
   google_sign_in: ^6.2.1
 
 dev_dependencies:

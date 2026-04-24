@@ -1,7 +1,9 @@
 // lib/signup.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // This fixes both errors
 import 'package:firebase_auth/firebase_auth.dart';
+
 
 class SpendWiseSignUpScreen extends StatefulWidget {
   const SpendWiseSignUpScreen({super.key});
@@ -32,7 +34,8 @@ class _SpendWiseSignUpScreenState extends State<SpendWiseSignUpScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSignUp() async {
+ Future<void> _handleSignUp() async {
+    // 1. Basic Validation
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
@@ -43,23 +46,38 @@ class _SpendWiseSignUpScreenState extends State<SpendWiseSignUpScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Create the user (Firebase logs them in automatically here)
+      // 2. Create the user in Firebase Auth
+      // This creates the record seen in the Authentication tab
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 2. Sync the Display Name
+      // 3. Store User Metadata in Firestore
+      // This fulfills the Sprint 2 requirement: "Store user metadata (UID, Email, Name) in the cloud"
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'uid': userCredential.user!.uid,
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'role': 'student',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // 4. Sync the Display Name to the Firebase Auth Profile
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
       await userCredential.user?.reload();
 
-      // 3. MANDATORY: Sign out immediately.
-      // This "tricks" the Auth Listener in main.dart so it doesn't 
-      // jump to the Dashboard. It stays on the Login UI.
+      // 5. MANDATORY: Sign out immediately
+      // This prevents the Auth State Listener in main.dart from auto-logging 
+      // the user into the Dashboard prematurely
       await FirebaseAuth.instance.signOut();
 
       if (mounted) {
+        // Show success feedback to the student
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Account Created! Please log in with your credentials.'),
@@ -67,7 +85,7 @@ class _SpendWiseSignUpScreenState extends State<SpendWiseSignUpScreen> {
           ),
         );
 
-        // 4. Go back to the Login Screen
+        // 6. Return to the Login Screen
         Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
@@ -78,12 +96,12 @@ class _SpendWiseSignUpScreenState extends State<SpendWiseSignUpScreen> {
         _showError(message);
       }
     } catch (e) {
-      if (mounted) _showError("An unexpected error occurred.");
+      debugPrint("Detailed Error: $e");
+      if (mounted) _showError("An unexpected error occurred during setup.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   // Updated _showError with safety check
   void _showError(String message) {
     if (!mounted) return; // Prevent crashes if screen is closing
