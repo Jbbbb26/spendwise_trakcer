@@ -5,11 +5,26 @@ import 'package:google_sign_in/google_sign_in.dart';
 class SpendWiseProfileScreen extends StatelessWidget {
   const SpendWiseProfileScreen({super.key});
 
-  // --- Logout Logic ---
+// --- Logout Logic ---
   Future<void> _handleLogout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    await GoogleSignIn().signOut();
-    // Go back to login screen
+    // 1. Show a loading spinner immediately so the app doesn't feel frozen
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents closing the dialog by tapping outside
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Colors.greenAccent),
+      ),
+    );
+
+    try {
+      // 2. Perform the network sign-outs
+      await GoogleSignIn().signOut();
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint("Logout Error: $e");
+    }
+
+    // 3. Navigate back to the login screen and clear the route history
     if (context.mounted) {
       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     }
@@ -77,7 +92,6 @@ class SpendWiseProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Edit icon
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -89,7 +103,6 @@ class SpendWiseProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Name from Database
               Text(displayName,
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold)),
@@ -97,12 +110,10 @@ class SpendWiseProfileScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 30),
 
-              // Wealth Card
               _buildStatsCard("TOTAL WEALTH MANAGED", "\$142,500.00",
                   "+12.4% this year", Colors.white, Colors.black),
               const SizedBox(height: 16),
 
-              // Savings Card
               _buildStatsCard(
                   "SAVINGS GOAL", "84%", "", primaryDarkGreen, Colors.white,
                   isProgress: true),
@@ -127,7 +138,6 @@ class SpendWiseProfileScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // THE LOGOUT BUTTON
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

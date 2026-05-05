@@ -13,7 +13,6 @@ class SpendWiseLoginScreen extends StatefulWidget {
 }
 
 class _SpendWiseLoginScreenState extends State<SpendWiseLoginScreen> {
-  // --- Auth State & Controllers ---
   bool _obscurePassword = true;
   bool _rememberDevice = false;
   bool _isLoading = false;
@@ -21,13 +20,11 @@ class _SpendWiseLoginScreenState extends State<SpendWiseLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // --- Branding Colors ---
   final Color primaryDarkGreen = const Color(0xFF0F3826);
   final Color inputBackgroundColor = const Color(0xFFF3F4F6);
   final Color textLightGray = const Color(0xFF6B7280);
   final Color borderLightGray = const Color(0xFFE5E7EB);
 
-  // --- Logic: Email/Password Login ---
   Future<void> _loginWithEmail() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showError("Please fill in all fields");
@@ -53,16 +50,13 @@ class _SpendWiseLoginScreenState extends State<SpendWiseLoginScreen> {
   Future<void> _loginWithGoogle() async {
   setState(() => _isLoading = true);
   try {
-    // 1. Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // 2. Handle User Cancellation
     if (googleUser == null) {
       if (mounted) setState(() => _isLoading = false);
       return; // User closed the popup, stop here without showing an error
     }
 
-    // 3. Obtain auth details
     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
@@ -70,20 +64,14 @@ class _SpendWiseLoginScreenState extends State<SpendWiseLoginScreen> {
       idToken: googleAuth.idToken,
     );
 
-    // 4. Sign in to Firebase
-    // The Auth Listener in main.dart will notice this and move to /dashboard
     await FirebaseAuth.instance.signInWithCredential(credential);
 
-    // 5. DO NOT navigate manually. 
-    // The listener handles the screen swap.
-    
+ 
   } catch (e) {
-    // Only show error if we are still on the Login screen
     if (mounted) {
       _showError("Google Sign-In failed. Check your connection or SHA-1.");
     }
   } finally {
-    // Only update state if the widget still exists
     if (mounted) {
       setState(() => _isLoading = false);
     }

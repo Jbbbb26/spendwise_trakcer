@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Added Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:spendwise_trakcer/login.dart'; 
 import 'package:spendwise_trakcer/profile.dart'; 
+// Add the import for your new overview screen file here:
+import 'package:spendwise_trakcer/overview_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    // options: DefaultFirebaseOptions.currentPlatform,  
+  );
+
   runApp(const SpendWiseApp());
 }
 
@@ -22,7 +27,6 @@ class SpendWiseApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F3826)),
         useMaterial3: true,
       ),
-      // --- Updated: Using StreamBuilder as the Auth State Listener ---
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -37,10 +41,11 @@ class SpendWiseApp extends StatelessWidget {
 
           // 2. If the snapshot has data, the user is logged in
           if (snapshot.hasData) {
-            return const SpendWiseProfileScreen();
+            // ---> CHANGED HERE: Return the Overview Screen instead of Profile <---
+            return const SpendWiseOverviewScreen();
           }
 
-          // 3. If no user is found, show the Login screen (image_d23c3d.png)
+          // 3. If no user is found, show the Login screen
           return const SpendWiseLoginScreen();
         },
       ),
@@ -49,6 +54,8 @@ class SpendWiseApp extends StatelessWidget {
       routes: {
         '/login': (context) => const SpendWiseLoginScreen(),
         '/profile': (context) => const SpendWiseProfileScreen(),
+        // ---> CHANGED HERE: Added the overview screen to your routes <---
+        '/overview': (context) => const SpendWiseOverviewScreen(), 
       },
     );
   }
